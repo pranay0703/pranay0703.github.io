@@ -34,61 +34,61 @@ const skillsData = [
     {
         category: 'PROGRAMMING LANGUAGES',
         skills: [
-            { name: 'Python', level: 95, icon: '🐍' },
-            { name: 'SQL', level: 90, icon: '🗄️' },
-            { name: 'R', level: 85, icon: '📊' },
-            { name: 'Java', level: 82, icon: '☕' },
-            { name: 'C++', level: 80, icon: '⚡' }
+            { name: 'Python', level: 95 },
+            { name: 'SQL', level: 90 },
+            { name: 'R', level: 85 },
+            { name: 'Java', level: 82 },
+            { name: 'C++', level: 80 }
         ]
     },
     {
         category: 'MACHINE LEARNING & AI',
         skills: [
-            { name: 'PyTorch', level: 92, icon: '🔥' },
-            { name: 'TensorFlow', level: 88, icon: '🧠' },
-            { name: 'Scikit-learn', level: 94, icon: '🔬' },
-            { name: 'LLMs (LLaMA 2)', level: 85, icon: '🤖' },
-            { name: 'Deep Learning', level: 90, icon: '⚡' }
+            { name: 'PyTorch', level: 92 },
+            { name: 'TensorFlow', level: 88 },
+            { name: 'Scikit-learn', level: 94 },
+            { name: 'LLMs (LLaMA 2)', level: 85 },
+            { name: 'Deep Learning', level: 90 }
         ]
     },
     {
         category: 'DATA SCIENCE & ANALYTICS',
         skills: [
-            { name: 'Pandas/NumPy', level: 96, icon: '🐼' },
-            { name: 'Feature Engineering', level: 88, icon: '🔧' },
-            { name: 'NLP', level: 85, icon: '💬' },
-            { name: 'Graph Neural Networks', level: 82, icon: '🕸️' },
-            { name: 'Reinforcement Learning', level: 78, icon: '🎮' },
-            { name: 'Tableau/Power BI', level: 88, icon: '📊' }
+            { name: 'Pandas/NumPy', level: 96 },
+            { name: 'Feature Engineering', level: 88 },
+            { name: 'NLP', level: 85 },
+            { name: 'Graph Neural Networks', level: 82 },
+            { name: 'Reinforcement Learning', level: 78 }
         ]
     },
     {
         category: 'CLOUD & BIG DATA',
         skills: [
-            { name: 'AWS (S3, EC2, SageMaker)', level: 88, icon: '☁️' },
-            { name: 'Azure (ML, Analytics)', level: 85, icon: '🔵' },
-            { name: 'Docker/Kubernetes', level: 82, icon: '🐳' },
-            { name: 'Apache Spark', level: 80, icon: '⚡' },
-            { name: 'Kafka', level: 75, icon: '📡' }
+            { name: 'AWS (S3, EC2, SageMaker)', level: 88 },
+            { name: 'Azure (ML, Analytics)', level: 85 },
+            { name: 'Docker/Kubernetes', level: 82 },
+            { name: 'Apache Spark', level: 80 },
+            { name: 'Kafka', level: 75 }
         ]
     },
     {
         category: 'DATABASES & TOOLS',
         skills: [
-            { name: 'PostgreSQL/MySQL', level: 85, icon: '🐘' },
-            { name: 'Neo4j (Graph DB)', level: 80, icon: '🟢' },
-            { name: 'Vector DBs (Pinecone)', level: 78, icon: '📐' },
-            { name: 'Snowflake', level: 75, icon: '❄️' }
+            { name: 'PostgreSQL/MySQL', level: 85 },
+            { name: 'Neo4j (Graph DB)', level: 80 },
+            { name: 'Vector DBs (Pinecone)', level: 78 },
+            { name: 'Snowflake', level: 75 },
+            { name: 'Tableau/Power BI', level: 88 }
         ]
     },
     {
         category: 'SPECIALIZED TECHNOLOGIES',
         skills: [
-            { name: 'Knowledge Graphs', level: 82, icon: '🧠' },
-            { name: 'Medical Ontologies', level: 75, icon: '🏥' },
-            { name: 'MLOps/CI-CD', level: 80, icon: '🔄' },
-            { name: 'SHAP/Explainable AI', level: 78, icon: '🔍' },
-            { name: 'Streamlit/FastAPI', level: 85, icon: '🚀' }
+            { name: 'Knowledge Graphs', level: 82 },
+            { name: 'Medical Ontologies', level: 75 },
+            { name: 'MLOps/CI-CD', level: 80 },
+            { name: 'SHAP/Explainable AI', level: 78 },
+            { name: 'Streamlit/FastAPI', level: 85 }
         ]
     }
 ];
@@ -142,7 +142,6 @@ function addStaticTransition() {
         screenContainer.classList.remove('static-transition');
     }, 800);
 }
-
 
 // ===== TYPEWRITER EFFECT =====
 async function typeWriter(element, text, speed = 10) {
@@ -231,137 +230,63 @@ async function runDiagnostics() {
     const skillsLog = document.getElementById('skills-log');
     skillsLog.innerHTML = '';
     
-    // Add system startup message
-    const startupMsg = document.createElement('div');
-    startupMsg.className = 'system-startup';
-    startupMsg.innerHTML = `
-        <div class="startup-line">> INITIALIZING SKILL DIAGNOSTICS...</div>
-        <div class="startup-line">> SCANNING TECHNICAL CAPABILITIES...</div>
-        <div class="startup-line">> LOADING EXPERTISE MATRIX...</div>
-        <div class="startup-line">> READY FOR ANALYSIS</div>
-        <div class="startup-line">========================================</div>
-    `;
-    skillsLog.appendChild(startupMsg);
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     for (const category of skillsData) {
-        // Add category header with terminal styling
+        // Add category header
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'skill-category';
-        categoryDiv.innerHTML = `
-            <div class="category-header">
-                <span class="category-icon">[${getCategoryIcon(category.category)}]</span>
-                <span class="category-name">${category.category}</span>
-                <span class="category-status">ACTIVE</span>
-            </div>
-        `;
+        categoryDiv.innerHTML = `<h3>${category.category}</h3>`;
         skillsLog.appendChild(categoryDiv);
         
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
-        // Add skills grid for this category
-        const skillsGrid = document.createElement('div');
-        skillsGrid.className = 'skills-grid';
-        
+        // Add each skill in the category
         for (const skill of category.skills) {
-            await addSkillCard(skill, skillsGrid);
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await addSkillLine(skill, skillsLog);
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        skillsLog.appendChild(skillsGrid);
-        await new Promise(resolve => setTimeout(resolve, 400));
+        await new Promise(resolve => setTimeout(resolve, 200));
     }
-    
-    // Add completion message
-    const completionMsg = document.createElement('div');
-    completionMsg.className = 'system-completion';
-    completionMsg.innerHTML = `
-        <div class="completion-line">========================================</div>
-        <div class="completion-line">> DIAGNOSTIC COMPLETE</div>
-        <div class="completion-line">> ALL SYSTEMS OPERATIONAL</div>
-        <div class="completion-line">> READY FOR DEPLOYMENT</div>
-    `;
-    skillsLog.appendChild(completionMsg);
 }
 
-function getCategoryIcon(category) {
-    const icons = {
-        'PROGRAMMING LANGUAGES': '💻',
-        'MACHINE LEARNING & AI': '🤖',
-        'DATA SCIENCE & ANALYTICS': '📊',
-        'CLOUD & BIG DATA': '☁️',
-        'DATABASES & TOOLS': '🗄️',
-        'SPECIALIZED TECHNOLOGIES': '⚡'
-    };
-    return icons[category] || '🔧';
-}
-
-async function addSkillCard(skill, container) {
-    const skillCard = document.createElement('div');
-    skillCard.className = 'skill-card';
+async function addSkillLine(skill, container) {
+    const skillLine = document.createElement('div');
+    skillLine.className = 'skill-line';
     
-    // Create skill level visualization
-    const levelBars = createLevelVisualization(skill.level);
-    
-    skillCard.innerHTML = `
-        <div class="skill-header">
-            <span class="skill-icon">${skill.icon}</span>
-            <span class="skill-name">${skill.name}</span>
+    skillLine.innerHTML = `
+        <div class="skill-name">${skill.name}</div>
+        <div class="skill-bar">
+            <div class="skill-fill" style="width: 0%"></div>
         </div>
-        <div class="skill-level">
-            <div class="level-bars">${levelBars}</div>
-            <div class="level-text">${getLevelText(skill.level)}</div>
-        </div>
-        <div class="skill-percentage">${skill.level}%</div>
+        <div class="skill-percentage">0%</div>
     `;
     
-    container.appendChild(skillCard);
+    container.appendChild(skillLine);
     
-    // Animate the skill card appearance
-    await animateSkillCard(skillCard);
+    // Animate the skill bar
+    await fillBar(skillLine, skill.level);
 }
 
-function createLevelVisualization(level) {
-    const totalBars = 10;
-    const filledBars = Math.round((level / 100) * totalBars);
-    let bars = '';
+async function fillBar(skillLine, targetLevel) {
+    const skillFill = skillLine.querySelector('.skill-fill');
+    const skillPercentage = skillLine.querySelector('.skill-percentage');
     
-    for (let i = 0; i < totalBars; i++) {
-        if (i < filledBars) {
-            bars += '<span class="level-bar filled">█</span>';
-        } else {
-            bars += '<span class="level-bar empty">░</span>';
-        }
-    }
+    let currentLevel = 0;
+    const increment = targetLevel / 20; // 20 steps for faster animation
     
-    return bars;
-}
-
-function getLevelText(level) {
-    if (level >= 90) return 'EXPERT';
-    if (level >= 80) return 'ADVANCED';
-    if (level >= 70) return 'INTERMEDIATE';
-    if (level >= 60) return 'BEGINNER';
-    return 'LEARNING';
-}
-
-async function animateSkillCard(card) {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px) scale(0.9)';
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    card.style.transition = 'all 0.5s ease-out';
-    card.style.opacity = '1';
-    card.style.transform = 'translateY(0) scale(1)';
-    
-    // Animate level bars
-    const levelBars = card.querySelectorAll('.level-bar.filled');
-    for (let i = 0; i < levelBars.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-        levelBars[i].style.animation = 'barFill 0.3s ease-out';
-    }
+    return new Promise(resolve => {
+        const interval = setInterval(() => {
+            currentLevel += increment;
+            if (currentLevel >= targetLevel) {
+                currentLevel = targetLevel;
+                clearInterval(interval);
+                resolve();
+            }
+            
+            skillFill.style.width = `${currentLevel}%`;
+            skillPercentage.textContent = `${Math.round(currentLevel)}%`;
+        }, 10);
+    });
 }
 
 // ===== CHANNEL SWITCHING =====
@@ -605,7 +530,6 @@ function initializeApp() {
     
     // Set up scroll detection
     setupScrollDetection();
-    
     
     // Trigger initial hero animation
     setTimeout(() => {
