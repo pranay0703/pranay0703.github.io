@@ -7,14 +7,6 @@ let completedAnimations = new Set(); // Track completed animations
 let dataStreamInterval;
 let bitElements = [];
 
-// ===== GAME VARIABLES =====
-let gameScore = 0;
-let gameRunning = false;
-let gameSpeed = 3;
-let isJumping = false;
-let gameInterval;
-let obstacleInterval;
-
 // Channel mapping
 const channelMap = {
     'hero': '01',
@@ -66,7 +58,8 @@ const skillsData = [
             { name: 'Feature Engineering', level: 88, icon: '🔧' },
             { name: 'NLP', level: 85, icon: '💬' },
             { name: 'Graph Neural Networks', level: 82, icon: '🕸️' },
-            { name: 'Reinforcement Learning', level: 78, icon: '🎮' }
+            { name: 'Reinforcement Learning', level: 78, icon: '🎮' },
+            { name: 'Tableau/Power BI', level: 88, icon: '📊' }
         ]
     },
     {
@@ -83,10 +76,9 @@ const skillsData = [
         category: 'DATABASES & TOOLS',
         skills: [
             { name: 'PostgreSQL/MySQL', level: 85, icon: '🐘' },
-            { name: 'Neo4j (Graph DB)', level: 80, icon: '🕸️' },
+            { name: 'Neo4j (Graph DB)', level: 80, icon: '🟢' },
             { name: 'Vector DBs (Pinecone)', level: 78, icon: '📐' },
-            { name: 'Snowflake', level: 75, icon: '❄️' },
-            { name: 'Tableau/Power BI', level: 88, icon: '📈' }
+            { name: 'Snowflake', level: 75, icon: '❄️' }
         ]
     },
     {
@@ -151,201 +143,6 @@ function addStaticTransition() {
     }, 800);
 }
 
-// ===== RETRO RUNNING GAME =====
-function initializeGame() {
-    console.log('Initializing game...');
-    const gameScreen = document.getElementById('game-screen');
-    const character = document.getElementById('game-character');
-    const obstacle = document.getElementById('game-obstacle');
-    
-    console.log('Game elements:', { gameScreen, character, obstacle });
-    
-    if (!gameScreen || !character || !obstacle) {
-        console.error('Game elements not found!');
-        return;
-    }
-    
-    // Reset game state
-    gameScore = 0;
-    gameRunning = false;
-    isJumping = false;
-    gameSpeed = 3;
-    
-    // Clear any existing game over overlay
-    const gameOver = gameScreen.querySelector('.game-over');
-    if (gameOver) {
-        gameOver.remove();
-    }
-    
-    // Reset character position
-    character.classList.remove('jumping');
-    character.style.transform = 'translateY(0)';
-    
-    // Reset obstacle position
-    obstacle.style.right = '100%';
-    obstacle.style.animation = 'none';
-    obstacle.style.display = 'block';
-    
-    // Update score display
-    updateScore();
-    
-    // Start the game after a short delay
-    setTimeout(() => {
-        startGame();
-    }, 500);
-}
-
-function startGame() {
-    console.log('Starting game...');
-    if (gameRunning) {
-        console.log('Game already running');
-        return;
-    }
-    
-    gameRunning = true;
-    const obstacle = document.getElementById('game-obstacle');
-    
-    console.log('Obstacle element:', obstacle);
-    
-    // Start obstacle movement
-    obstacle.style.right = '-50px'; // Start from off-screen
-    obstacle.style.animation = `moveObstacle ${gameSpeed}s linear infinite`;
-    console.log('Obstacle animation set:', obstacle.style.animation);
-    
-    // Test: Make obstacle visible for debugging
-    setTimeout(() => {
-        console.log('Obstacle position after 1 second:', obstacle.style.right);
-        console.log('Obstacle computed style:', window.getComputedStyle(obstacle).right);
-    }, 1000);
-    
-    // Start scoring
-    gameInterval = setInterval(() => {
-        if (gameRunning) {
-            gameScore += 10;
-            updateScore();
-            
-            // Increase speed over time
-            if (gameScore % 500 === 0 && gameSpeed > 1.5) {
-                gameSpeed -= 0.2;
-                obstacle.style.animation = `moveObstacle ${gameSpeed}s linear infinite`;
-            }
-        }
-    }, 100);
-    
-    // Check for collisions
-    obstacleInterval = setInterval(checkCollision, 50);
-    
-    console.log('Game started successfully');
-    
-    // Add visual indicator that game is running
-    const gameScreen = document.getElementById('game-screen');
-    if (gameScreen) {
-        gameScreen.style.border = '2px solid #00ff00';
-        setTimeout(() => {
-            gameScreen.style.border = '1px solid var(--border-color)';
-        }, 2000);
-    }
-}
-
-function jump() {
-    console.log('Jump attempted. Game running:', gameRunning, 'Is jumping:', isJumping);
-    if (!gameRunning || isJumping) return;
-    
-    const character = document.getElementById('game-character');
-    isJumping = true;
-    character.classList.add('jumping');
-    console.log('Character jumping animation started');
-    
-    setTimeout(() => {
-        character.classList.remove('jumping');
-        isJumping = false;
-        console.log('Character jumping animation ended');
-    }, 600);
-}
-
-function checkCollision() {
-    if (!gameRunning) return;
-    
-    const character = document.getElementById('game-character');
-    const obstacle = document.getElementById('game-obstacle');
-    
-    if (!character || !obstacle) return;
-    
-    const characterRect = character.getBoundingClientRect();
-    const obstacleRect = obstacle.getBoundingClientRect();
-    const gameScreenRect = document.getElementById('game-screen').getBoundingClientRect();
-    
-    // Adjust positions relative to game screen
-    const charLeft = characterRect.left - gameScreenRect.left;
-    const charRight = characterRect.right - gameScreenRect.left;
-    const charTop = characterRect.top - gameScreenRect.top;
-    const charBottom = characterRect.bottom - gameScreenRect.top;
-    
-    const obsLeft = obstacleRect.left - gameScreenRect.left;
-    const obsRight = obstacleRect.right - gameScreenRect.left;
-    const obsTop = obstacleRect.top - gameScreenRect.top;
-    const obsBottom = obstacleRect.bottom - gameScreenRect.top;
-    
-    // Check if character and obstacle overlap
-    if (charRight > obsLeft && charLeft < obsRight && charBottom > obsTop && charTop < obsBottom) {
-        gameOver();
-    }
-}
-
-function gameOver() {
-    gameRunning = false;
-    clearInterval(gameInterval);
-    clearInterval(obstacleInterval);
-    
-    const gameScreen = document.getElementById('game-screen');
-    const gameOverDiv = document.createElement('div');
-    gameOverDiv.className = 'game-over';
-    gameOverDiv.innerHTML = `
-        <h3>GAME OVER</h3>
-        <p>FINAL SCORE: ${gameScore}</p>
-        <button class="restart-btn" onclick="initializeGame()">RESTART</button>
-    `;
-    
-    gameScreen.appendChild(gameOverDiv);
-}
-
-function updateScore() {
-    const scoreElement = document.getElementById('game-score');
-    if (scoreElement) {
-        scoreElement.textContent = gameScore;
-    }
-}
-
-function setupGameControls() {
-    console.log('Setting up game controls...');
-    
-    // Space bar to jump
-    document.addEventListener('keydown', (e) => {
-        console.log('Key pressed:', e.code, 'Current channel:', currentChannel);
-        if (e.code === 'Space' && currentChannel === 'hero') {
-            e.preventDefault();
-            console.log('Space bar jump triggered');
-            jump();
-        }
-    });
-    
-    // Click to jump (mobile support)
-    const gameScreen = document.getElementById('game-screen');
-    if (gameScreen) {
-        gameScreen.addEventListener('click', () => {
-            console.log('Game screen clicked, current channel:', currentChannel);
-            if (currentChannel === 'hero') {
-                console.log('Click jump triggered');
-                jump();
-            }
-        });
-        console.log('Click event listener added to game screen');
-    } else {
-        console.error('Game screen not found for click event');
-    }
-    
-    console.log('Game controls setup complete');
-}
 
 // ===== TYPEWRITER EFFECT =====
 async function typeWriter(element, text, speed = 10) {
@@ -809,13 +606,6 @@ function initializeApp() {
     // Set up scroll detection
     setupScrollDetection();
     
-    // Set up game controls
-    setupGameControls();
-    
-    // Initialize the game
-    setTimeout(() => {
-        initializeGame();
-    }, 1000);
     
     // Trigger initial hero animation
     setTimeout(() => {
