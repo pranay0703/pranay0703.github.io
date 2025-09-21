@@ -399,6 +399,27 @@ a:hover {
     }
 }
 
+/* Matrix line styling */
+.matrix-line {
+    margin-bottom: 8px;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+    transition: all 0.8s ease-out;
+}
+
+@keyframes textGlow {
+    0% { 
+        text-shadow: 0 0 5px var(--accent-cyan-active);
+        opacity: 0.7;
+    }
+    100% { 
+        text-shadow: 0 0 15px var(--accent-cyan-active), 0 0 25px var(--accent-cyan-active);
+        opacity: 1;
+    }
+}
+
 @keyframes pulse {
     0%, 100% { 
         transform: scale(1);

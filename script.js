@@ -17,56 +17,78 @@ const channelMap = {
 };
 
 // About text content
-const aboutText = `Hello! I'm Alex Chen, a passionate Senior Frontend Developer with over 6 years of experience crafting immersive digital experiences.
+const aboutText = `Hello! I'm Venkata Pranay Bathini, a passionate Data Scientist and Machine Learning Engineer currently pursuing my M.S. in Data Science at the University of Maryland, College Park (GPA: 3.85/4.0).
 
-I specialize in modern web technologies including React, Vue.js, and TypeScript, with a particular focus on creating performant, accessible, and visually stunning user interfaces.
+I specialize in advanced machine learning, deep learning, and cloud technologies, with expertise in Python, PyTorch, TensorFlow, and cloud platforms like AWS, Azure, and GCP. My work focuses on developing innovative AI solutions for complex real-world problems.
 
-My journey began with a fascination for how things work under the hood, which led me to pursue Computer Science and eventually specialize in frontend development. I believe that great code is not just functional, but also beautiful and maintainable.
+My journey began with a Computer Science degree from PES University, where I developed a strong foundation in programming and algorithms. I've since specialized in cutting-edge areas like Graph Neural Networks, Large Language Models, and multimodal AI systems.
 
-When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or sharing knowledge with the developer community through blog posts and speaking engagements.
+I've published research on LLM-based interview systems at IEEE ISML 2024 and have been recognized in top-tier competitions, including finishing in the top 15% at Datathon 2024. My projects span from fraud detection systems to rare disease diagnostics, consistently achieving high accuracy and real-world impact.
 
-I'm always excited to work on challenging projects that push the boundaries of what's possible on the web. Let's create something amazing together!`;
+When I'm not developing ML models, you can find me exploring new AI research, contributing to open-source projects, or working on innovative solutions that bridge the gap between academic research and practical applications.
+
+I'm always excited to work on challenging projects that push the boundaries of what's possible with AI and machine learning. Let's build the future together!`;
 
 // Skills data
 const skillsData = [
     {
-        category: 'FRONTEND TECHNOLOGIES',
+        category: 'PROGRAMMING LANGUAGES',
         skills: [
-            { name: 'React/Next.js', level: 95 },
-            { name: 'Vue.js/Nuxt.js', level: 90 },
-            { name: 'TypeScript', level: 92 },
-            { name: 'JavaScript (ES6+)', level: 98 },
-            { name: 'HTML5/CSS3', level: 96 }
+            { name: 'Python', level: 95 },
+            { name: 'SQL', level: 90 },
+            { name: 'R', level: 85 },
+            { name: 'Java', level: 82 },
+            { name: 'C++', level: 80 }
         ]
     },
     {
-        category: 'STYLING & DESIGN',
+        category: 'MACHINE LEARNING & AI',
         skills: [
-            { name: 'Sass/SCSS', level: 88 },
-            { name: 'Tailwind CSS', level: 85 },
-            { name: 'CSS Grid/Flexbox', level: 94 },
-            { name: 'Figma/Adobe XD', level: 82 },
-            { name: 'Responsive Design', level: 96 }
+            { name: 'PyTorch', level: 92 },
+            { name: 'TensorFlow', level: 88 },
+            { name: 'Scikit-learn', level: 94 },
+            { name: 'LLMs (LLaMA 2)', level: 85 },
+            { name: 'Deep Learning', level: 90 }
         ]
     },
     {
-        category: 'TOOLS & WORKFLOW',
+        category: 'DATA SCIENCE & ANALYTICS',
         skills: [
-            { name: 'Git/GitHub', level: 92 },
-            { name: 'Webpack/Vite', level: 87 },
-            { name: 'Docker', level: 78 },
-            { name: 'Jest/Testing', level: 85 },
-            { name: 'CI/CD', level: 80 }
+            { name: 'Pandas/NumPy', level: 96 },
+            { name: 'Feature Engineering', level: 88 },
+            { name: 'NLP', level: 85 },
+            { name: 'Graph Neural Networks', level: 82 },
+            { name: 'Reinforcement Learning', level: 78 }
         ]
     },
     {
-        category: 'BACKEND & DATABASE',
+        category: 'CLOUD & BIG DATA',
         skills: [
-            { name: 'Node.js/Express', level: 75 },
-            { name: 'MongoDB', level: 70 },
-            { name: 'PostgreSQL', level: 68 },
-            { name: 'REST APIs', level: 82 },
-            { name: 'GraphQL', level: 76 }
+            { name: 'AWS (S3, EC2, SageMaker)', level: 88 },
+            { name: 'Azure (ML, Analytics)', level: 85 },
+            { name: 'Docker/Kubernetes', level: 82 },
+            { name: 'Apache Spark', level: 80 },
+            { name: 'Kafka', level: 75 }
+        ]
+    },
+    {
+        category: 'DATABASES & TOOLS',
+        skills: [
+            { name: 'PostgreSQL/MySQL', level: 85 },
+            { name: 'Neo4j (Graph DB)', level: 80 },
+            { name: 'Vector DBs (Pinecone)', level: 78 },
+            { name: 'Snowflake', level: 75 },
+            { name: 'Tableau/Power BI', level: 88 }
+        ]
+    },
+    {
+        category: 'SPECIALIZED TECHNOLOGIES',
+        skills: [
+            { name: 'Knowledge Graphs', level: 82 },
+            { name: 'Medical Ontologies', level: 75 },
+            { name: 'MLOps/CI-CD', level: 80 },
+            { name: 'SHAP/Explainable AI', level: 78 },
+            { name: 'Streamlit/FastAPI', level: 85 }
         ]
     }
 ];
@@ -134,6 +156,72 @@ async function typeWriter(element, text, speed = 10) {
         }
         i++;
         await new Promise(resolve => setTimeout(resolve, speed));
+    }
+}
+
+// ===== MATRIX REVEAL EFFECT =====
+async function matrixReveal(element, text) {
+    element.innerHTML = '';
+    
+    // Split text into lines
+    const lines = text.split('\n');
+    
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const line = lines[lineIndex];
+        
+        // Create a line container
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'matrix-line';
+        lineDiv.style.opacity = '0';
+        lineDiv.style.transform = 'translateY(20px)';
+        lineDiv.style.transition = 'all 0.8s ease-out';
+        
+        // Add glitch effect characters first
+        const glitchChars = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+        let displayText = '';
+        
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === ' ') {
+                displayText += ' ';
+            } else {
+                displayText += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            }
+        }
+        
+        lineDiv.innerHTML = displayText;
+        element.appendChild(lineDiv);
+        
+        // Animate line appearance
+        await new Promise(resolve => setTimeout(resolve, 100));
+        lineDiv.style.opacity = '1';
+        lineDiv.style.transform = 'translateY(0)';
+        
+        // Glitch effect - change characters rapidly
+        for (let glitchStep = 0; glitchStep < 3; glitchStep++) {
+            await new Promise(resolve => setTimeout(resolve, 150));
+            
+            let glitchText = '';
+            for (let i = 0; i < line.length; i++) {
+                if (line[i] === ' ') {
+                    glitchText += ' ';
+                } else {
+                    glitchText += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                }
+            }
+            lineDiv.innerHTML = glitchText;
+        }
+        
+        // Reveal actual text
+        await new Promise(resolve => setTimeout(resolve, 200));
+        lineDiv.innerHTML = line;
+        lineDiv.style.color = 'var(--accent-cyan-active)';
+        lineDiv.style.textShadow = '0 0 8px var(--accent-cyan-active)';
+        
+        // Add a subtle glow effect
+        lineDiv.style.animation = 'textGlow 0.5s ease-out';
+        
+        // Wait before next line
+        await new Promise(resolve => setTimeout(resolve, 300));
     }
 }
 
@@ -247,7 +335,7 @@ async function triggerSectionAnimation(channelId) {
     switch (channelId) {
         case 'about':
             await new Promise(resolve => setTimeout(resolve, 300));
-            await typeWriter(document.getElementById('about-text-content'), aboutText);
+            await matrixReveal(document.getElementById('about-text-content'), aboutText);
             completedAnimations.add('about');
             break;
             
