@@ -396,12 +396,27 @@ function handleContactForm() {
 function setupProjectCards() {
     const projectCards = document.querySelectorAll('.project-card');
     
+    // GitHub repository URLs mapping
+    const projectUrls = {
+        'multimodal-cib-detection': 'https://github.com/pranay0703/multimodal-cib-detection',
+        'rare-disease-ai': 'https://github.com/pranay0703/rare-disease-ai',
+        'air-quality-health-risk': 'https://github.com/pranay0703/air_quality_health_risk',
+        'multilingual-nlp-platform': 'https://github.com/pranay0703/multilingual_nlp_platform',
+        'neurosymbolic-storyteller': 'https://github.com/pranay0703/neurosymbolic_storyteller',
+        'eco-challenge-hub': 'https://github.com/pranay0703/eco-challenge-hub'
+    };
+    
     projectCards.forEach(card => {
         card.addEventListener('click', () => {
             const project = card.dataset.project;
-            console.log(`Clicked on project: ${project}`);
-            // Add your project click handling here
-            // For example: window.open(projectUrl, '_blank');
+            const projectUrl = projectUrls[project];
+            
+            if (projectUrl) {
+                console.log(`Opening project: ${project} - ${projectUrl}`);
+                window.open(projectUrl, '_blank');
+            } else {
+                console.log(`No URL found for project: ${project}`);
+            }
         });
         
         // Add hover sound effect (optional)
