@@ -427,6 +427,7 @@ a:hover {
     font-size: 1.8rem;
     z-index: 5;
     animation: moveObstacle 3s linear infinite;
+    display: block;
 }
 
 @keyframes moveObstacle {
@@ -480,6 +481,26 @@ a:hover {
 
 .control-instruction:nth-child(2) {
     animation-delay: 1s;
+}
+
+.start-game-btn {
+    background: var(--accent-cyan-active);
+    color: var(--text-on-accent);
+    border: none;
+    padding: 8px 16px;
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.start-game-btn:hover {
+    background: var(--text-primary);
+    color: var(--accent-cyan-active);
+    box-shadow: 0 0 10px var(--accent-cyan-active);
 }
 
 /* Game over overlay */
