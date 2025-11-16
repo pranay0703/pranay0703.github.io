@@ -1,790 +1,977 @@
-// ===== GLOBAL VARIABLES =====
-let currentChannel = 'hero';
-let isAnimating = false;
-let completedAnimations = new Set(); // Track completed animations
+// ===============================================
+// Premium Portfolio — Enhanced Interactions
+// ===============================================
 
-// ===== DATA STREAM VARIABLES =====
-let dataStreamInterval;
-let bitElements = [];
+(() => {
+  "use strict";
 
-// Channel mapping
-const channelMap = {
-    'hero': '01',
-    'about': '02', 
-    'projects': '03',
-    'skills': '04',
-    'contact': '05'
-};
+  const doc = document;
+  const root = doc.documentElement;
+  const body = doc.body;
 
-// About text content
-const aboutText = `Hello! I'm Venkata Pranay Bathini, a passionate Data Scientist and Machine Learning Engineer currently pursuing my M.S. in Data Science at the University of Maryland, College Park (GPA: 3.85/4.0).
+  // ==========================================
+  // Utility Functions
+  // ==========================================
 
-I specialize in advanced machine learning, deep learning, and cloud technologies, with expertise in Python, PyTorch, TensorFlow, and cloud platforms like AWS, Azure, and GCP. My work focuses on developing innovative AI solutions for complex real-world problems.
+  function $(selector, context = doc) {
+    return context.querySelector(selector);
+  }
 
-My journey began with a Computer Science degree from PES University, where I developed a strong foundation in programming and algorithms. I've since specialized in cutting-edge areas like Graph Neural Networks, Large Language Models, and multimodal AI systems.
+  function $$(selector, context = doc) {
+    return Array.from(context.querySelectorAll(selector));
+  }
 
-I've published research on LLM-based interview systems at IEEE ISML 2024 and have been recognized in top-tier competitions, including finishing in the top 15% at Datathon 2024. My projects span from fraud detection systems to rare disease diagnostics, consistently achieving high accuracy and real-world impact.
+  function debounce(fn, ms) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
 
-When I'm not developing ML models, you can find me exploring new AI research, contributing to open-source projects, or working on innovative solutions that bridge the gap between academic research and practical applications.
+  function throttle(fn, ms) {
+    let lastTime = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastTime >= ms) {
+        lastTime = now;
+        fn.apply(this, args);
+      }
+    };
+  }
 
-I'm always excited to work on challenging projects that push the boundaries of what's possible with AI and machine learning. Let's build the future together!`;
+  // ==========================================
+  // Theme Management (Auto/Light/Dark)
+  // ==========================================
 
-// Skills data
-const skillsData = [
-    {
-        category: 'PROGRAMMING LANGUAGES',
-        skills: [
-            { name: 'Python', level: 95 },
-            { name: 'SQL', level: 90 },
-            { name: 'R', level: 85 },
-            { name: 'Java', level: 82 },
-            { name: 'C++', level: 80 }
-        ]
+  const ThemeManager = {
+    storageKey: "theme-preference",
+    themeBtn: $("#theme-toggle"),
+    metaTheme: $('meta[name="theme-color"]'),
+    systemQuery: window.matchMedia("(prefers-color-scheme: dark)"),
+
+    init() {
+      const saved = this.getStoredTheme();
+      this.applyTheme(saved);
+      this.systemQuery.addEventListener?.("change", () => {
+        if (this.getStoredTheme() === "auto") this.applyTheme("auto");
+      });
+      this.themeBtn?.addEventListener("click", () => this.cycle());
     },
-    {
-        category: 'MACHINE LEARNING & AI',
-        skills: [
-            { name: 'PyTorch', level: 92 },
-            { name: 'TensorFlow', level: 88 },
-            { name: 'Scikit-learn', level: 94 },
-            { name: 'LLMs (LLaMA 2)', level: 85 },
-            { name: 'Deep Learning', level: 90 }
-        ]
+
+    getStoredTheme() {
+      const v = localStorage.getItem(this.storageKey);
+      return ["auto", "light", "dark"].includes(v) ? v : "auto";
     },
-    {
-        category: 'DATA SCIENCE & ANALYTICS',
-        skills: [
-            { name: 'Pandas/NumPy', level: 96 },
-            { name: 'Feature Engineering', level: 88 },
-            { name: 'NLP', level: 85 },
-            { name: 'Graph Neural Networks', level: 82 },
-            { name: 'Reinforcement Learning', level: 78 }
-        ]
+
+    setStoredTheme(mode) {
+      localStorage.setItem(this.storageKey, mode);
     },
-    {
-        category: 'CLOUD & BIG DATA',
-        skills: [
-            { name: 'AWS (S3, EC2, SageMaker)', level: 88 },
-            { name: 'Azure (ML, Analytics)', level: 85 },
-            { name: 'Docker/Kubernetes', level: 82 },
-            { name: 'Apache Spark', level: 80 },
-            { name: 'Kafka', level: 75 }
-        ]
+
+    applyTheme(mode) {
+      root.setAttribute("data-theme", mode);
+      this.updateButton(mode);
+      this.updateMetaTheme();
     },
-    {
-        category: 'DATABASES & TOOLS',
-        skills: [
-            { name: 'PostgreSQL/MySQL', level: 85 },
-            { name: 'Neo4j (Graph DB)', level: 80 },
-            { name: 'Vector DBs (Pinecone)', level: 78 },
-            { name: 'Snowflake', level: 75 },
-            { name: 'Tableau/Power BI', level: 88 }
-        ]
+
+    updateButton(mode) {
+      if (!this.themeBtn) return;
+      this.themeBtn.dataset.mode = mode;
+      const label = mode.charAt(0).toUpperCase() + mode.slice(1);
+      this.themeBtn.setAttribute("aria-label", `Theme: ${label}`);
+      const icon = mode === "dark" ? "◐" : mode === "light" ? "◯" : "◐";
+      const iconEl = $(".theme-icon", this.themeBtn);
+      if (iconEl) iconEl.textContent = icon;
     },
-    {
-        category: 'SPECIALIZED TECHNOLOGIES',
-        skills: [
-            { name: 'Knowledge Graphs', level: 82 },
-            { name: 'Medical Ontologies', level: 75 },
-            { name: 'MLOps/CI-CD', level: 80 },
-            { name: 'SHAP/Explainable AI', level: 78 },
-            { name: 'Streamlit/FastAPI', level: 85 }
-        ]
-    }
-];
 
-// ===== UTILITY FUNCTIONS =====
-function updateClock() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { 
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit', 
-        second: '2-digit'
-    });
-    const footerTimeString = now.toLocaleTimeString('en-US', { 
-        hour12: true,
-        hour: 'numeric',
-        minute: '2-digit'
-    });
-    
-    document.getElementById('clock').textContent = timeString;
-    const footerClock = document.getElementById('footer-clock');
-    if (footerClock) {
-        footerClock.textContent = footerTimeString;
-    }
-}
+    updateMetaTheme() {
+      try {
+        const bg = getComputedStyle(root)
+          .getPropertyValue("--bg")
+          .trim();
+        if (bg && this.metaTheme) this.metaTheme.setAttribute("content", bg);
+      } catch (e) {}
+    },
 
-// Function to reset animations (useful for testing)
-function resetAnimations() {
-    completedAnimations.clear();
-    // Clear about text content
-    const aboutTextElement = document.getElementById('about-text-content');
-    if (aboutTextElement) {
-        aboutTextElement.innerHTML = '';
-    }
-    // Clear skills log
-    const skillsLog = document.getElementById('skills-log');
-    if (skillsLog) {
-        skillsLog.innerHTML = '';
-    }
-}
+    cycle() {
+      const current = this.getStoredTheme();
+      const next = current === "auto" ? "light" : current === "light" ? "dark" : "auto";
+      this.setStoredTheme(next);
+      this.applyTheme(next);
+    },
+  };
 
-function updateChannelDisplay(channelId) {
-    document.getElementById('current-channel').textContent = channelMap[channelId] || '01';
-}
+  // ==========================================
+  // Mobile Navigation Toggle
+  // ==========================================
 
-function addStaticTransition() {
-    const screenContainer = document.querySelector('.screen-container');
-    screenContainer.classList.add('static-transition');
-    
-    setTimeout(() => {
-        screenContainer.classList.remove('static-transition');
-    }, 800);
-}
+  const MobileNav = {
+    toggle: $("#nav-toggle"),
+    menu: $("#nav-menu"),
 
-// ===== TYPEWRITER EFFECT =====
-async function typeWriter(element, text, speed = 10) {
-    element.innerHTML = '';
-    let i = 0;
-    
-    while (i < text.length) {
-        if (text[i] === '\n') {
-            element.innerHTML += '<br>';
-        } else {
-            element.innerHTML += text[i];
+    init() {
+      this.toggle?.addEventListener("click", () => this.toggleMenu());
+      this.menu?.addEventListener("click", (e) => {
+        if (e.target.tagName === "A") this.close();
+      });
+      doc.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") this.close();
+      });
+    },
+
+    toggleMenu() {
+      const isOpen = this.menu.classList.contains("is-open");
+      isOpen ? this.close() : this.open();
+    },
+
+    open() {
+      this.menu.classList.add("is-open");
+      this.toggle?.setAttribute("aria-expanded", "true");
+    },
+
+    close() {
+      this.menu.classList.remove("is-open");
+      this.toggle?.setAttribute("aria-expanded", "false");
+    },
+  };
+
+  // ==========================================
+  // Scroll Progress Bar
+  // ==========================================
+
+  const ScrollProgress = {
+    bar: $(".scroll-progress"),
+
+    init() {
+      if (!this.bar) return;
+      window.addEventListener("scroll", throttle(() => this.update(), 16), {
+        passive: true,
+      });
+      this.update();
+    },
+
+    update() {
+      const scrollable = doc.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = window.scrollY;
+      const progress = scrollable > 0 ? scrolled / scrollable : 0;
+      this.bar.style.transform = `scaleX(${progress})`;
+    },
+  };
+
+  // ==========================================
+  // Custom Cursor
+  // ==========================================
+
+  const CustomCursor = {
+    cursor: $(".cursor"),
+    follower: $(".cursor-follower"),
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+    followerX: window.innerWidth / 2,
+    followerY: window.innerHeight / 2,
+    isHovering: false,
+    isInitialized: false,
+
+    init() {
+      if (!this.cursor || !this.follower) return;
+      if (window.matchMedia("(hover: none)").matches) return;
+
+      // Initialize cursor position in center
+      this.cursor.style.left = `${this.x}px`;
+      this.cursor.style.top = `${this.y}px`;
+      this.follower.style.left = `${this.followerX}px`;
+      this.follower.style.top = `${this.followerY}px`;
+
+      doc.addEventListener("mousemove", (e) => {
+        this.x = e.clientX;
+        this.y = e.clientY;
+        
+        // Enable custom cursor on first move
+        if (!this.isInitialized) {
+          body.classList.add("has-custom-cursor");
+          this.isInitialized = true;
         }
-        i++;
-        await new Promise(resolve => setTimeout(resolve, speed));
-    }
-}
+      });
 
-// ===== MATRIX REVEAL EFFECT =====
-async function matrixReveal(element, text) {
-    element.innerHTML = '';
-    
-    // Split text into lines
-    const lines = text.split('\n');
-    
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-        const line = lines[lineIndex];
-        
-        // Create a line container
-        const lineDiv = document.createElement('div');
-        lineDiv.className = 'matrix-line';
-        lineDiv.style.opacity = '0';
-        lineDiv.style.transform = 'translateY(20px)';
-        lineDiv.style.transition = 'all 0.8s ease-out';
-        
-        // Add glitch effect characters first
-        const glitchChars = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
-        let displayText = '';
-        
-        for (let i = 0; i < line.length; i++) {
-            if (line[i] === ' ') {
-                displayText += ' ';
-            } else {
-                displayText += glitchChars[Math.floor(Math.random() * glitchChars.length)];
-            }
-        }
-        
-        lineDiv.innerHTML = displayText;
-        element.appendChild(lineDiv);
-        
-        // Animate line appearance
-        await new Promise(resolve => setTimeout(resolve, 100));
-        lineDiv.style.opacity = '1';
-        lineDiv.style.transform = 'translateY(0)';
-        
-        // Glitch effect - change characters rapidly
-        for (let glitchStep = 0; glitchStep < 3; glitchStep++) {
-            await new Promise(resolve => setTimeout(resolve, 150));
-            
-            let glitchText = '';
-            for (let i = 0; i < line.length; i++) {
-                if (line[i] === ' ') {
-                    glitchText += ' ';
-                } else {
-                    glitchText += glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                }
-            }
-            lineDiv.innerHTML = glitchText;
-        }
-        
-        // Reveal actual text
-        await new Promise(resolve => setTimeout(resolve, 200));
-        lineDiv.innerHTML = line;
-        lineDiv.style.color = 'var(--accent-cyan-active)';
-        lineDiv.style.textShadow = '0 0 8px var(--accent-cyan-active)';
-        
-        // Add a subtle glow effect
-        lineDiv.style.animation = 'textGlow 0.5s ease-out';
-        
-        // Wait before next line
-        await new Promise(resolve => setTimeout(resolve, 300));
-    }
-}
+      // Show cursor immediately and start animation
+      this.cursor.style.opacity = "1";
+      this.follower.style.opacity = "1";
 
-// ===== SKILLS DIAGNOSTICS =====
-async function runDiagnostics() {
-    const skillsLog = document.getElementById('skills-log');
-    skillsLog.innerHTML = '';
-    
-    for (const category of skillsData) {
-        // Add category header
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'skill-category';
-        categoryDiv.innerHTML = `<h3>${category.category}</h3>`;
-        skillsLog.appendChild(categoryDiv);
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Add each skill in the category
-        for (const skill of category.skills) {
-            await addSkillLine(skill, skillsLog);
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
-    }
-}
-
-async function addSkillLine(skill, container) {
-    const skillLine = document.createElement('div');
-    skillLine.className = 'skill-line';
-    
-    skillLine.innerHTML = `
-        <div class="skill-name">${skill.name}</div>
-        <div class="skill-bar">
-            <div class="skill-fill" style="width: 0%"></div>
-        </div>
-        <div class="skill-percentage">0%</div>
-    `;
-    
-    container.appendChild(skillLine);
-    
-    // Animate the skill bar
-    await fillBar(skillLine, skill.level);
-}
-
-async function fillBar(skillLine, targetLevel) {
-    const skillFill = skillLine.querySelector('.skill-fill');
-    const skillPercentage = skillLine.querySelector('.skill-percentage');
-    
-    let currentLevel = 0;
-    const increment = targetLevel / 20; // 20 steps for faster animation
-    
-    return new Promise(resolve => {
-        const interval = setInterval(() => {
-            currentLevel += increment;
-            if (currentLevel >= targetLevel) {
-                currentLevel = targetLevel;
-                clearInterval(interval);
-                resolve();
-            }
-            
-            skillFill.style.width = `${currentLevel}%`;
-            skillPercentage.textContent = `${Math.round(currentLevel)}%`;
-        }, 10);
-    });
-}
-
-// ===== CHANNEL SWITCHING =====
-async function changeChannel(channelId) {
-    if (isAnimating || currentChannel === channelId) return;
-    
-    isAnimating = true;
-    
-    // Add static transition effect
-    addStaticTransition();
-    
-    // Wait for transition to complete
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    // Update navigation buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-channel="${channelId}"]`).classList.add('active');
-    
-    // Scroll to the target section
-    const targetSection = document.getElementById(channelId);
-    if (targetSection) {
-        targetSection.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
+      // Hover states - Note: pointer-events must not be none on these elements
+      const interactiveElements = $$("a, button, .tilt-card, input, textarea, select");
+      interactiveElements.forEach((el) => {
+        el.addEventListener("mouseenter", () => {
+          body.classList.add("cursor-hover");
+          this.isHovering = true;
         });
-    }
-    
-    // Update channel display
-    updateChannelDisplay(channelId);
-    currentChannel = channelId;
-    
-    // Trigger section-specific animations
-    await triggerSectionAnimation(channelId);
-    
-    isAnimating = false;
-}
+        el.addEventListener("mouseleave", () => {
+          body.classList.remove("cursor-hover");
+          this.isHovering = false;
+        });
+        el.addEventListener("mousedown", () => body.classList.add("cursor-active"));
+        el.addEventListener("mouseup", () => body.classList.remove("cursor-active"));
+      });
 
-async function triggerSectionAnimation(channelId) {
-    // Check if animation has already been completed
-    if (completedAnimations.has(channelId)) {
+      this.animate();
+    },
+
+    animate() {
+      // Cursor follows immediately
+      this.cursor.style.left = `${this.x}px`;
+      this.cursor.style.top = `${this.y}px`;
+
+      // Follower has smooth lag
+      this.followerX += (this.x - this.followerX) * 0.15;
+      this.followerY += (this.y - this.followerY) * 0.15;
+      this.follower.style.left = `${this.followerX}px`;
+      this.follower.style.top = `${this.followerY}px`;
+
+      requestAnimationFrame(() => this.animate());
+    },
+  };
+
+  // ==========================================
+  // Active Navigation Highlighting
+  // ==========================================
+
+  const ActiveNav = {
+    links: $$(".nav-link"),
+    sections: [],
+
+    init() {
+      if (!this.links.length) return;
+      this.sections = this.links
+        .map((link) => {
+          const id = link.getAttribute("href");
+          return id?.startsWith("#") ? $(id) : null;
+        })
+        .filter(Boolean);
+
+      window.addEventListener(
+        "scroll",
+        throttle(() => this.update(), 100),
+        { passive: true }
+      );
+      this.update();
+    },
+
+    update() {
+      const scrollY = window.scrollY + 100;
+      let current = null;
+
+      this.sections.forEach((section) => {
+        const top = section.offsetTop;
+        const height = section.offsetHeight;
+        if (scrollY >= top && scrollY < top + height) {
+          current = section.id;
+        }
+      });
+
+      this.links.forEach((link) => {
+        const href = link.getAttribute("href")?.substring(1);
+        link.classList.toggle("active", href === current);
+      });
+    },
+  };
+
+  // ==========================================
+  // Reveal on Scroll (IntersectionObserver)
+  // ==========================================
+
+  const RevealOnScroll = {
+    prefersReduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+
+    init() {
+      const reveals = $$(".reveal, .skill-item, .timeline-item");
+      if (!reveals.length) return;
+
+      if (this.prefersReduced) {
+        reveals.forEach((el) => el.classList.add("in-view"));
         return;
-    }
-    
-    switch (channelId) {
-        case 'about':
-            await new Promise(resolve => setTimeout(resolve, 300));
-            await matrixReveal(document.getElementById('about-text-content'), aboutText);
-            completedAnimations.add('about');
-            break;
-            
-        case 'skills':
-            await new Promise(resolve => setTimeout(resolve, 300));
-            await runDiagnostics();
-            completedAnimations.add('skills');
-            break;
-            
-        case 'hero':
-            // Trigger power-on animation if coming from another section
-            const heroTitle = document.querySelector('.hero-title');
-            heroTitle.style.animation = 'none';
-            heroTitle.offsetHeight; // Trigger reflow
-            heroTitle.style.animation = 'powerOn 2s ease-out';
-            completedAnimations.add('hero');
-            break;
-    }
-}
+      }
 
-// ===== CONTACT FORM HANDLING =====
-function handleContactForm() {
-    const form = document.getElementById('contact-form');
-    const statusDiv = document.getElementById('transmission-status');
-    const submitBtn = form.querySelector('.transmit-btn');
-    
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Disable form and show transmitting state
-        submitBtn.textContent = '[ TRANSMITTING... ]';
-        submitBtn.disabled = true;
-        form.style.display = 'none';
-        
-        // Show status div
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = '';
-        
-        // Simulate transmission delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Show success message with typewriter effect
-        const successMessage = '// TRANSMISSION_SUCCESSFUL. //\n// MESSAGE_RECEIVED. //\n// THANK_YOU_FOR_CONTACTING. //';
-        await typeWriter(statusDiv, successMessage, 15);
-        
-        // Reset form after delay
-        setTimeout(() => {
-            form.reset();
-            form.style.display = 'block';
-            submitBtn.textContent = '[ TRANSMIT MESSAGE ]';
-            submitBtn.disabled = false;
-            statusDiv.style.display = 'none';
-        }, 3000);
-    });
-}
-
-// ===== PROJECT CARD INTERACTIONS =====
-function setupProjectCards() {
-    const projectCards = document.querySelectorAll('.project-card');
-    
-    // GitHub repository URLs mapping
-    const projectUrls = {
-        'multimodal-cib-detection': 'https://github.com/pranay0703/multimodal-cib-detection',
-        'rare-disease-ai': 'https://github.com/pranay0703/rare-disease-ai',
-        'air-quality-health-risk': 'https://github.com/pranay0703/air_quality_health_risk',
-        'multilingual-nlp-platform': 'https://github.com/pranay0703/multilingual_nlp_platform',
-        'neurosymbolic-storyteller': 'https://github.com/pranay0703/neurosymbolic_storyteller',
-        'eco-challenge-hub': 'https://github.com/pranay0703/eco-challenge-hub'
-    };
-    
-    projectCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const project = card.dataset.project;
-            const projectUrl = projectUrls[project];
-            
-            if (projectUrl) {
-                console.log(`Opening project: ${project} - ${projectUrl}`);
-                window.open(projectUrl, '_blank');
-            } else {
-                console.log(`No URL found for project: ${project}`);
-            }
-        });
-        
-        // Add hover sound effect (optional)
-        card.addEventListener('mouseenter', () => {
-            card.style.transform = 'scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'scale(1)';
-        });
-    });
-}
-
-// ===== KEYBOARD NAVIGATION =====
-function setupKeyboardNavigation() {
-    document.addEventListener('keydown', (e) => {
-        if (isAnimating) return;
-        
-        const channels = ['hero', 'about', 'projects', 'skills', 'contact'];
-        const currentIndex = channels.indexOf(currentChannel);
-        
-        switch (e.key) {
-            case 'ArrowLeft':
-            case 'ArrowUp':
-                e.preventDefault();
-                const prevIndex = currentIndex > 0 ? currentIndex - 1 : channels.length - 1;
-                changeChannel(channels[prevIndex]);
-                break;
-                
-            case 'ArrowRight':
-            case 'ArrowDown':
-                e.preventDefault();
-                const nextIndex = currentIndex < channels.length - 1 ? currentIndex + 1 : 0;
-                changeChannel(channels[nextIndex]);
-                break;
-                
-            case '1':
-                changeChannel('hero');
-                break;
-            case '2':
-                changeChannel('about');
-                break;
-            case '3':
-                changeChannel('projects');
-                break;
-            case '4':
-                changeChannel('skills');
-                break;
-            case '5':
-                changeChannel('contact');
-                break;
-        }
-    });
-}
-
-// ===== SCROLL DETECTION =====
-function setupScrollDetection() {
-    const sections = document.querySelectorAll('.content-section');
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const fixedNav = document.querySelector('.fixed-nav');
-    let lastTriggeredSection = '';
-    
-    function updateActiveSection() {
-        let current = '';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (window.scrollY >= (sectionTop - 200)) {
-                current = section.getAttribute('id');
-            }
-        });
-        
-        if (current && current !== currentChannel) {
-            currentChannel = current;
-            updateChannelDisplay(current);
-            
-            // Update navigation buttons
-            navButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.channel === current) {
-                    btn.classList.add('active');
-                }
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("in-view");
+                io.unobserve(entry.target);
+              }
             });
-        }
-        
-        // Trigger section animations when scrolling to them
-        if (current && current !== lastTriggeredSection) {
-            lastTriggeredSection = current;
-            console.log(`Scrolling to section: ${current}`);
-            triggerSectionAnimation(current);
-        }
-        
-        // Handle transparent effect on scroll
-        if (window.scrollY > 50) {
-            fixedNav.classList.add('scrolled');
+          },
+          { threshold: 0.1 }
+        );
+        reveals.forEach((el) => io.observe(el));
+      } else {
+        // Fallback
+        reveals.forEach((el) => el.classList.add("in-view"));
+      }
+    },
+  };
+
+  // ==========================================
+  // Floating Particles (Hero Background)
+  // ==========================================
+
+  const Particles = {
+    container: $(".particles"),
+    count: 20,
+
+    init() {
+      if (!this.container) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      for (let i = 0; i < this.count; i++) {
+        const particle = doc.createElement("div");
+        particle.className = "particle";
+        particle.style.cssText = `
+          position: absolute;
+          width: ${Math.random() * 4 + 2}px;
+          height: ${Math.random() * 4 + 2}px;
+          background: var(--accent);
+          opacity: ${Math.random() * 0.3 + 0.1};
+          border-radius: 50%;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          animation: float ${Math.random() * 20 + 10}s linear infinite;
+          animation-delay: ${Math.random() * -20}s;
+        `;
+        this.container.appendChild(particle);
+      }
+
+      // Inject keyframes
+      if (!$("#particle-keyframes")) {
+        const style = doc.createElement("style");
+        style.id = "particle-keyframes";
+        style.textContent = `
+          @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, -20px) rotate(90deg); }
+            50% { transform: translate(-10px, -40px) rotate(180deg); }
+            75% { transform: translate(20px, -30px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+          }
+        `;
+        doc.head.appendChild(style);
+      }
+    },
+  };
+
+  // ==========================================
+  // 3D Tilt Effect on Work Cards
+  // ==========================================
+
+  const TiltCards = {
+    cards: $$(".tilt-card"),
+
+    init() {
+      if (window.matchMedia("(hover: none)").matches) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      this.cards.forEach((card) => {
+        card.addEventListener("mousemove", (e) => this.handleMove(e, card));
+        card.addEventListener("mouseleave", () => this.handleLeave(card));
+      });
+    },
+
+    handleMove(e, card) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -8;
+      const rotateY = ((x - centerX) / centerX) * 8;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    },
+
+    handleLeave(card) {
+      card.style.transform = "";
+    },
+  };
+
+  // ==========================================
+  // Magnetic Button Effect
+  // ==========================================
+
+  const MagneticButtons = {
+    buttons: $$(".magnetic"),
+
+    init() {
+      if (window.matchMedia("(hover: none)").matches) return;
+
+      this.buttons.forEach((btn) => {
+        btn.addEventListener("mousemove", (e) => this.handleMove(e, btn));
+        btn.addEventListener("mouseleave", () => this.handleLeave(btn));
+      });
+    },
+
+    handleMove(e, btn) {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      const distance = Math.sqrt(x * x + y * y);
+      const strength = Math.min(distance / 2, 15);
+      const angle = Math.atan2(y, x);
+      const offsetX = Math.cos(angle) * strength * 0.3;
+      const offsetY = Math.sin(angle) * strength * 0.3;
+
+      btn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    },
+
+    handleLeave(btn) {
+      btn.style.transform = "";
+    },
+  };
+
+  // ==========================================
+  // Project Filtering
+  // ==========================================
+
+  const ProjectFilter = {
+    filters: $$(".filter-btn"),
+    cards: $$(".work-card"),
+
+    init() {
+      this.filters.forEach((btn) => {
+        btn.addEventListener("click", () => this.filter(btn));
+      });
+    },
+
+    filter(btn) {
+      const category = btn.dataset.filter;
+
+      // Update active state
+      this.filters.forEach((f) => f.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Filter cards
+      this.cards.forEach((card) => {
+        const categories = card.dataset.category?.split(" ") || [];
+        const match = category === "all" || categories.includes(category);
+
+        if (match) {
+          card.classList.remove("hidden");
+          card.style.display = "";
         } else {
-            fixedNav.classList.remove('scrolled');
-        }
-    }
-    
-    window.addEventListener('scroll', updateActiveSection);
-}
-
-// ===== INITIALIZATION =====
-function initializeApp() {
-    // Set up clock
-    updateClock();
-    setInterval(updateClock, 1000);
-    
-    // Set up navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const channel = btn.dataset.channel;
-            changeChannel(channel);
-        });
-    });
-    
-    // Set up contact form
-    handleContactForm();
-    
-    // Set up project cards
-    setupProjectCards();
-    
-    // Set up keyboard navigation
-    setupKeyboardNavigation();
-    
-    // Set up scroll detection
-    setupScrollDetection();
-    
-    // Trigger initial hero animation
-    setTimeout(() => {
-        const heroTitle = document.querySelector('.hero-title');
-        if (heroTitle) {
-            heroTitle.style.animation = 'powerOn 2s ease-out';
-        }
-    }, 500);
-    
-    // Add some random glitch effects to the hero title
-    setInterval(() => {
-        if (currentChannel === 'hero') {
-            const heroTitle = document.querySelector('.hero-title');
-            if (heroTitle && Math.random() < 0.1) { // 10% chance every interval
-                heroTitle.style.animation = 'none';
-                heroTitle.offsetHeight; // Trigger reflow
-                heroTitle.style.animation = 'glitch 0.5s ease-in-out';
+          card.classList.add("hidden");
+          setTimeout(() => {
+            if (card.classList.contains("hidden")) {
+              card.style.display = "none";
             }
+          }, 300);
         }
-    }, 3000);
-}
+      });
+    },
+  };
 
-// ===== PERFORMANCE OPTIMIZATIONS =====
-function optimizePerformance() {
-    // Throttle scroll events
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
+  // ==========================================
+  // Project Modal
+  // ==========================================
+
+  const ProjectModal = {
+    modal: $("#project-modal"),
+    body: $(".modal-body", $("#project-modal")),
+    triggers: $$("[data-modal]"),
+    closeButtons: $$("[data-close-modal]"),
+
+    projects: {
+      "project-1": {
+        title: "Nimbus Dashboard",
+        description: "Analytics system for product teams",
+        fullDescription: `
+          <h2>Nimbus Dashboard</h2>
+          <p>A comprehensive analytics platform designed to help product teams make data-driven decisions with clarity and speed.</p>
+          <h3>Challenge</h3>
+          <p>Product teams were struggling with fragmented analytics tools and unclear data visualization, leading to slow decision-making.</p>
+          <h3>Solution</h3>
+          <p>We redesigned the information architecture from the ground up, creating a unified dashboard with intuitive chart components and responsive grid layouts.</p>
+          <h3>Impact</h3>
+          <ul>
+            <li>28% improvement in task completion rates</li>
+            <li>5,000+ active users within 6 months</li>
+            <li>Reduced time-to-insight by 40%</li>
+          </ul>
+          <h3>Technologies</h3>
+          <p>React, TypeScript, D3.js, Styled Components, REST API</p>
+        `,
+      },
+      "project-2": {
+        title: "Sable Commerce",
+        description: "Minimal storefront with premium feel",
+        fullDescription: `
+          <h2>Sable Commerce</h2>
+          <p>A high-performance e-commerce platform with a focus on minimalism and premium user experience.</p>
+          <h3>Challenge</h3>
+          <p>Create a storefront that feels premium while maintaining exceptional performance and accessibility.</p>
+          <h3>Solution</h3>
+          <p>Systemized typography and spacing, implemented accessible forms, optimized asset delivery, and focused on Core Web Vitals.</p>
+          <h3>Impact</h3>
+          <ul>
+            <li>Time-to-Interactive under 1.2 seconds</li>
+            <li>Lighthouse score of 98</li>
+            <li>45% increase in conversion rates</li>
+          </ul>
+          <h3>Technologies</h3>
+          <p>Next.js, Tailwind CSS, Stripe, Vercel, Headless CMS</p>
+        `,
+      },
+      "project-3": {
+        title: "Atlas Docs",
+        description: "Documentation framework for API products",
+        fullDescription: `
+          <h2>Atlas Docs</h2>
+          <p>A search-first documentation framework designed for complex API products.</p>
+          <h3>Challenge</h3>
+          <p>Developers needed faster access to documentation with better code samples and clearer navigation patterns.</p>
+          <h3>Solution</h3>
+          <p>Built a search-first navigation system with instant results, integrated live code samples, and created consistent content patterns.</p>
+          <h3>Impact</h3>
+          <ul>
+            <li>Adopted by 3 internal product teams</li>
+            <li>45% increase in search usage</li>
+            <li>Reduced support tickets by 30%</li>
+          </ul>
+          <h3>Technologies</h3>
+          <p>Vue.js, Markdown, Algolia Search, GitHub API</p>
+        `,
+      },
+    },
+
+    init() {
+      this.triggers.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const projectId = btn.dataset.modal;
+          this.open(projectId);
+        });
+      });
+
+      this.closeButtons.forEach((btn) => {
+        btn.addEventListener("click", () => this.close());
+      });
+
+      doc.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") this.close();
+      });
+    },
+
+    open(projectId) {
+      const project = this.projects[projectId];
+      if (!project || !this.modal) return;
+
+      this.body.innerHTML = project.fullDescription;
+      this.modal.removeAttribute("hidden");
+      this.modal.setAttribute("aria-hidden", "false");
+      body.style.overflow = "hidden";
+    },
+
+    close() {
+      if (!this.modal) return;
+      this.modal.setAttribute("hidden", "");
+      this.modal.setAttribute("aria-hidden", "true");
+      body.style.overflow = "";
+    },
+  };
+
+  // ==========================================
+  // Testimonials Carousel
+  // ==========================================
+
+  const TestimonialsCarousel = {
+    cards: $$(".testimonial-card"),
+    dots: $$(".dot"),
+    prevBtn: $(".carousel-btn.prev"),
+    nextBtn: $(".carousel-btn.next"),
+    current: 0,
+    autoplayInterval: null,
+
+    init() {
+      if (!this.cards.length) return;
+
+      this.prevBtn?.addEventListener("click", () => this.prev());
+      this.nextBtn?.addEventListener("click", () => this.next());
+
+      this.dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => this.goTo(index));
+      });
+
+      // Auto-play
+      this.startAutoplay();
+
+      // Pause on hover
+      this.cards.forEach((card) => {
+        card.addEventListener("mouseenter", () => this.stopAutoplay());
+        card.addEventListener("mouseleave", () => this.startAutoplay());
+      });
+    },
+
+    goTo(index) {
+      this.cards.forEach((card, i) => {
+        card.classList.toggle("active", i === index);
+      });
+      this.dots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === index);
+        dot.setAttribute("aria-selected", i === index ? "true" : "false");
+      });
+      this.current = index;
+    },
+
+    next() {
+      this.goTo((this.current + 1) % this.cards.length);
+    },
+
+    prev() {
+      this.goTo((this.current - 1 + this.cards.length) % this.cards.length);
+    },
+
+    startAutoplay() {
+      this.stopAutoplay();
+      this.autoplayInterval = setInterval(() => this.next(), 6000);
+    },
+
+    stopAutoplay() {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval);
+        this.autoplayInterval = null;
+      }
+    },
+  };
+
+  // ==========================================
+  // Contact Form Validation & Submission
+  // ==========================================
+
+  const ContactForm = {
+    form: $("#contact-form"),
+    status: $(".form-status", $("#contact-form")),
+
+    init() {
+      if (!this.form) return;
+      this.form.addEventListener("submit", (e) => this.handleSubmit(e));
+
+      // Real-time validation
+      $$("input, textarea", this.form).forEach((field) => {
+        field.addEventListener("blur", () => this.validateField(field));
+      });
+    },
+
+    validateField(field) {
+      const error = field.parentElement.querySelector(".form-error");
+      if (!error) return;
+
+      if (!field.validity.valid) {
+        error.textContent = field.validationMessage;
+        field.setAttribute("aria-invalid", "true");
+        return false;
+      } else {
+        error.textContent = "";
+        field.removeAttribute("aria-invalid");
+        return true;
+      }
+    },
+
+    async handleSubmit(e) {
+      e.preventDefault();
+
+      // Validate all fields
+      const fields = $$("input, textarea", this.form);
+      const allValid = fields.every((field) => this.validateField(field));
+
+      if (!allValid) {
+        this.showStatus("Please fix the errors above.", "error");
+        return;
+      }
+
+      const btn = $("button[type=submit]", this.form);
+      if (btn) btn.classList.add("is-loading");
+
+      // Simulate submission (replace with real API call)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      if (btn) btn.classList.remove("is-loading");
+
+      // Success
+      this.showStatus("Message sent successfully! I'll get back to you soon.", "success");
+      this.form.reset();
+      Toast.show("Message sent!");
+    },
+
+    showStatus(message, type) {
+      if (!this.status) return;
+      this.status.textContent = message;
+      this.status.className = `form-status ${type}`;
+    },
+  };
+
+  // ==========================================
+  // Copy Email to Clipboard
+  // ==========================================
+
+  const CopyEmail = {
+    buttons: $$(".copy-email"),
+
+    init() {
+      this.buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const email = btn.dataset.email;
+          if (email) this.copy(email);
+        });
+      });
+    },
+
+    async copy(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        Toast.show("Email copied to clipboard!");
+      } catch (err) {
+        Toast.show("Failed to copy email", "error");
+      }
+    },
+  };
+
+  // ==========================================
+  // Toast Notifications
+  // ==========================================
+
+  const Toast = {
+    el: $("#toast"),
+    timeout: null,
+
+    show(message, duration = 3000) {
+      if (!this.el) return;
+      this.el.textContent = message;
+      this.el.classList.add("show");
+
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => this.hide(), duration);
+    },
+
+    hide() {
+      if (!this.el) return;
+      this.el.classList.remove("show");
+    },
+  };
+
+  // ==========================================
+  // Scroll to Top Button
+  // ==========================================
+
+  const ScrollToTop = {
+    init() {
+      // Wait for DOM to be fully ready and find button
+      setTimeout(() => {
+        const btn = document.querySelector(".scroll-top");
+        
+        if (!btn) {
+          console.error("❌ Scroll to top button not found!");
+          console.log("Available buttons:", document.querySelectorAll("button"));
+          return;
         }
-        scrollTimeout = setTimeout(() => {
-            // Handle scroll if needed
-        }, 16); // ~60fps
-    });
-    
-    // Use requestAnimationFrame for smooth animations
-    function smoothAnimation(callback) {
-        requestAnimationFrame(callback);
-    }
-    
-    // Preload critical resources
-    const criticalImages = [
-        // Add any critical image URLs here
-    ];
-    
-    criticalImages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-}
 
-// ===== ERROR HANDLING =====
-function setupErrorHandling() {
-    window.addEventListener('error', (e) => {
-        console.error('Portfolio Error:', e.error);
-        // Gracefully handle errors without breaking the user experience
-    });
-    
-    // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (e) => {
-        console.error('Unhandled Promise Rejection:', e.reason);
-        e.preventDefault();
-    });
-}
+        console.log("✅ Scroll to top button found:", btn);
 
-// ===== ACCESSIBILITY ENHANCEMENTS =====
-function setupAccessibility() {
-    // Add focus indicators for keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-            document.body.classList.add('keyboard-navigation');
-        }
-    });
-    
-    document.addEventListener('mousedown', () => {
-        document.body.classList.remove('keyboard-navigation');
-    });
-    
-    // Add ARIA labels and roles
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach((section, index) => {
-        section.setAttribute('role', 'tabpanel');
-        section.setAttribute('aria-labelledby', `nav-${section.id}`);
-    });
-    
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => {
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('aria-controls', btn.dataset.channel);
-    });
-}
+        // Direct onclick as most reliable method
+        btn.onclick = function(e) {
+          console.log("🚀 Scroll to top clicked!");
+          e.preventDefault();
+          e.stopPropagation();
+          
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0; // For Safari
+          
+          // Smooth scroll
+          window.scrollTo({ 
+            top: 0, 
+            left: 0,
+            behavior: "smooth" 
+          });
+          
+          return false;
+        };
 
-// ===== GSAP DATA STREAM FUNCTIONS =====
-function createDataStream() {
-    const dataStream = document.querySelector('.data-stream');
-    if (!dataStream) return;
-    
-    // Clear existing content
-    dataStream.innerHTML = '';
-    
-    // Create two rows
-    for (let row = 0; row < 2; row++) {
-        const streamLine = document.createElement('div');
-        streamLine.className = 'stream-line';
-        streamLine.style.position = 'absolute';
-        streamLine.style.top = `${row * 12}px`;
-        streamLine.style.left = '100%';
-        streamLine.style.display = 'flex';
-        streamLine.style.gap = '6px';
+        // Test click detection
+        btn.addEventListener("mouseenter", () => {
+          console.log("🖱️ Mouse entered button");
+        });
+
+        btn.addEventListener("mousedown", () => {
+          console.log("👆 Mouse down on button");
+        });
+
+        // Make absolutely sure it's clickable
+        btn.style.pointerEvents = "auto";
+        btn.style.cursor = "pointer";
+        btn.style.position = "relative";
+        btn.style.zIndex = "9999";
+
+        console.log("Button styles:", {
+          pointerEvents: btn.style.pointerEvents,
+          cursor: btn.style.cursor,
+          zIndex: btn.style.zIndex
+        });
+
+        // Visibility based on scroll
+        const updateVisibility = () => {
+          if (window.scrollY > 300) {
+            btn.style.opacity = "1";
+          } else {
+            btn.style.opacity = "0.5";
+          }
+        };
         
-        // Generate random bits for this row
-        const bits = Array.from({length: 20}, () => Math.random() > 0.5 ? '1' : '0');
-        bits.forEach((bit, index) => {
-            const bitElement = document.createElement('div');
-            bitElement.className = 'data-bit';
-            bitElement.textContent = bit;
-            bitElement.style.fontFamily = 'VT323, monospace';
-            bitElement.style.fontSize = '0.7rem';
-            bitElement.style.color = 'var(--accent-cyan-active)';
-            bitElement.style.textShadow = '0 0 6px var(--accent-cyan-active)';
-            bitElement.style.minWidth = '10px';
-            bitElement.style.textAlign = 'center';
-            bitElement.style.display = 'inline-block';
-            streamLine.appendChild(bitElement);
-        });
-        
-        dataStream.appendChild(streamLine);
-        
-        // Animate the stream line with GSAP
-        gsap.set(streamLine, { x: 0 });
-        gsap.to(streamLine, {
-            x: '-200%',
-            duration: 3,
-            ease: 'none',
-            repeat: -1,
-            delay: row * 0.5
-        });
-    }
-}
+        window.addEventListener("scroll", updateVisibility, { passive: true });
+        updateVisibility();
+      }, 100);
+    },
+  };
 
-function animateDataBits() {
-    const bitElements = document.querySelectorAll('.data-bit');
-    
-    bitElements.forEach((bit, index) => {
-        // Random flicker animation
-        gsap.to(bit, {
-            opacity: Math.random() * 0.5 + 0.5,
-            scale: Math.random() * 0.3 + 0.9,
-            duration: Math.random() * 0.5 + 0.2,
-            ease: 'power2.inOut',
-            repeat: -1,
-            yoyo: true,
-            delay: Math.random() * 2
-        });
-        
-        // Randomly change bit values
-        gsap.to({}, {
-            duration: Math.random() * 2 + 1,
-            onComplete: () => {
-                if (Math.random() < 0.3) {
-                    bit.textContent = Math.random() > 0.5 ? '1' : '0';
-                    gsap.fromTo(bit, 
-                        { scale: 1.5, opacity: 0.8 },
-                        { scale: 1, opacity: 1, duration: 0.2 }
-                    );
-                }
-            },
-            repeat: -1
-        });
-    });
-}
+  // ==========================================
+  // Keyboard Shortcuts
+  // ==========================================
 
-function addDataStreamInteractions() {
-    const dataStream = document.querySelector('.data-stream');
-    if (!dataStream) return;
-    
-    // Mouse hover effect
-    dataStream.addEventListener('mouseenter', () => {
-        gsap.to(dataStream, {
-            filter: 'brightness(1.3)',
-            duration: 0.3,
-            ease: 'power2.out'
-        });
-    });
-    
-    dataStream.addEventListener('mouseleave', () => {
-        gsap.to(dataStream, {
-            filter: 'brightness(1)',
-            duration: 0.3,
-            ease: 'power2.out'
-        });
-    });
-    
-    // Click to regenerate
-    dataStream.addEventListener('click', () => {
-        gsap.to(dataStream, {
-            scale: 0.95,
-            duration: 0.1,
-            yoyo: true,
-            repeat: 1,
-            onComplete: () => {
-                createDataStream();
-                animateDataBits();
+  const KeyboardShortcuts = {
+    hint: $("#shortcuts-hint"),
+
+    init() {
+      doc.addEventListener("keydown", (e) => {
+        // Ignore if typing in input
+        if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+
+        switch (e.key.toLowerCase()) {
+          case "t":
+            ThemeManager.cycle();
+            break;
+          case "arrowup":
+            if (e.shiftKey) {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }
+            break;
+          case "?":
+            e.preventDefault();
+            this.toggleHint();
+            break;
+        }
+      });
+
+      $(".close-hint", this.hint)?.addEventListener("click", () => this.hideHint());
+    },
+
+    toggleHint() {
+      if (!this.hint) return;
+      const isHidden = this.hint.hasAttribute("hidden");
+      isHidden ? this.showHint() : this.hideHint();
+    },
+
+    showHint() {
+      this.hint?.removeAttribute("hidden");
+      setTimeout(() => this.hideHint(), 10000);
+    },
+
+    hideHint() {
+      this.hint?.setAttribute("hidden", "");
+    },
+  };
+
+  // ==========================================
+  // Performance Metrics Display
+  // ==========================================
+
+  const PerformanceMetrics = {
+    el: $("#load-time"),
+
+    init() {
+      if (!this.el) return;
+      if (!window.performance) return;
+
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          const perf = performance.getEntriesByType("navigation")[0];
+          if (perf) {
+            const loadTime = perf.loadEventEnd - perf.fetchStart;
+            const seconds = (loadTime / 1000).toFixed(2);
+            this.el.textContent = `${seconds}s load`;
+          }
+        }, 0);
+      });
+    },
+  };
+
+  // ==========================================
+  // Lazy Load Images
+  // ==========================================
+
+  const LazyLoad = {
+    init() {
+      if ("loading" in HTMLImageElement.prototype) {
+        // Native lazy loading supported
+        return;
+      }
+
+      // Fallback for browsers without native support
+      const images = $$("img[loading=lazy]");
+      if (!images.length) return;
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src || img.src;
+            io.unobserve(img);
+          }
         });
-    });
-}
+      });
 
-function startDataStream() {
-    createDataStream();
-    animateDataBits();
-    addDataStreamInteractions();
-}
+      images.forEach((img) => io.observe(img));
+    },
+  };
 
-function stopDataStream() {
-    gsap.killTweensOf('.data-bit');
-    gsap.killTweensOf('.stream-line');
-}
+  // ==========================================
+  // Footer Year Auto-Update
+  // ==========================================
 
-// ===== INITIALIZE EVERYTHING =====
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-    optimizePerformance();
-    setupErrorHandling();
-    setupAccessibility();
-    
-    // Start data stream
-    startDataStream();
-    
-    console.log('🎮 CRT Portfolio Terminal Initialized');
-    console.log('📡 Use arrow keys or number keys (1-5) to navigate');
-    console.log('🎯 Click navigation buttons or use keyboard shortcuts');
-});
+  const UpdateYear = {
+    init() {
+      const yearEl = $("#year");
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    },
+  };
 
-// ===== EXPORT FOR TESTING (if needed) =====
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        changeChannel,
-        typeWriter,
-        runDiagnostics,
-        fillBar
-    };
-}
+  // ==========================================
+  // Initialize All Features
+  // ==========================================
+
+  function init() {
+    ThemeManager.init();
+    MobileNav.init();
+    ScrollProgress.init();
+    CustomCursor.init();
+    ActiveNav.init();
+    RevealOnScroll.init();
+    Particles.init();
+    TiltCards.init();
+    MagneticButtons.init();
+    ProjectFilter.init();
+    ProjectModal.init();
+    TestimonialsCarousel.init();
+    ContactForm.init();
+    CopyEmail.init();
+    ScrollToTop.init();
+    KeyboardShortcuts.init();
+    PerformanceMetrics.init();
+    LazyLoad.init();
+    UpdateYear.init();
+
+    // Add loaded class to body
+    body.classList.add("loaded");
+  }
+
+  // Start when DOM is ready
+  if (doc.readyState === "loading") {
+    doc.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

@@ -1,0 +1,27 @@
+{
+  "name": "Venkata Pranay Bathini — Data Scientist & ML Engineer",
+  "short_name": "Pranay Bathini",
+  "description": "Portfolio of Venkata Pranay Bathini — Data Scientist specializing in Machine Learning, AI, and Cloud Technologies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#5a7cff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "data-science", "machine-learning", "ai"],
+  "screenshots": []
+}
+

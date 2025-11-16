@@ -1,0 +1,55 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="health-grad" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18ccff"/>
+      <stop offset="1" stop-color="#5a7cff"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" rx="24" fill="url(#health-grad)" opacity="0.1"/>
+  <rect x="20" y="20" width="760" height="460" rx="18" fill="none" stroke="#6b7280" stroke-opacity="0.2"/>
+  
+  <!-- Knowledge Graph Structure -->
+  <g opacity="0.8">
+    <!-- Central medical entity -->
+    <circle cx="400" cy="250" r="30" fill="url(#health-grad)"/>
+    <text x="400" y="255" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Disease</text>
+    
+    <!-- Connected entities -->
+    <circle cx="150" cy="150" r="20" fill="#18ccff" opacity="0.8"/>
+    <text x="150" y="155" text-anchor="middle" fill="white" font-size="12">Symptom</text>
+    
+    <circle cx="650" cy="150" r="20" fill="#18ccff" opacity="0.8"/>
+    <text x="650" y="155" text-anchor="middle" fill="white" font-size="12">Gene</text>
+    
+    <circle cx="150" cy="350" r="20" fill="#5a7cff" opacity="0.8"/>
+    <text x="150" y="355" text-anchor="middle" fill="white" font-size="12">Treatment</text>
+    
+    <circle cx="650" cy="350" r="20" fill="#5a7cff" opacity="0.8"/>
+    <text x="650" y="355" text-anchor="middle" fill="white" font-size="12">Drug</text>
+    
+    <circle cx="400" cy="100" r="18" fill="#18ccff" opacity="0.7"/>
+    <circle cx="400" cy="400" r="18" fill="#5a7cff" opacity="0.7"/>
+  </g>
+  
+  <!-- Graph connections -->
+  <g stroke="url(#health-grad)" stroke-width="2.5" opacity="0.5">
+    <line x1="400" y1="250" x2="150" y2="150"/>
+    <line x1="400" y1="250" x2="650" y2="150"/>
+    <line x1="400" y1="250" x2="150" y2="350"/>
+    <line x1="400" y1="250" x2="650" y2="350"/>
+    <line x1="400" y1="250" x2="400" y2="100"/>
+    <line x1="400" y1="250" x2="400" y2="400"/>
+  </g>
+  
+  <!-- Vector database representation -->
+  <g opacity="0.4">
+    <rect x="50" y="50" width="100" height="60" rx="8" fill="url(#health-grad)" opacity="0.2"/>
+    <text x="100" y="80" text-anchor="middle" fill="#5a7cff" font-size="10">Vector DB</text>
+  </g>
+  
+  <!-- Time reduction metric -->
+  <text x="400" y="320" text-anchor="middle" fill="#5a7cff" font-size="20" font-weight="700" opacity="0.8">4.7y → 6mo</text>
+  <text x="400" y="340" text-anchor="middle" fill="#6b7280" font-size="11" opacity="0.7">Diagnosis Time</text>
+</svg>
