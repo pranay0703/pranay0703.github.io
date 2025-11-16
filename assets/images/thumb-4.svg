@@ -1,0 +1,47 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ai-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5a7cff"/>
+      <stop offset="1" stop-color="#18ccff"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" rx="24" fill="url(#ai-grad)" opacity="0.1"/>
+  <rect x="20" y="20" width="760" height="460" rx="18" fill="none" stroke="#6b7280" stroke-opacity="0.2"/>
+  
+  <!-- Chat/Conversation Interface -->
+  <g opacity="0.8">
+    <!-- User message bubble -->
+    <rect x="100" y="150" width="300" height="60" rx="20" fill="#5a7cff" opacity="0.3"/>
+    <text x="250" y="185" text-anchor="middle" fill="#5a7cff" font-size="12">User Question</text>
+    
+    <!-- AI response bubble -->
+    <rect x="400" y="250" width="300" height="80" rx="20" fill="url(#ai-grad)"/>
+    <text x="550" y="285" text-anchor="middle" fill="white" font-size="12" font-weight="600">AI Response</text>
+    <text x="550" y="305" text-anchor="middle" fill="white" font-size="11">Assessment &amp; Feedback</text>
+    
+    <!-- LLM indicator -->
+    <circle cx="700" cy="100" r="25" fill="url(#ai-grad)"/>
+    <text x="700" y="108" text-anchor="middle" fill="white" font-size="14" font-weight="bold">AI</text>
+  </g>
+  
+  <!-- Code block representation -->
+  <g opacity="0.6">
+    <rect x="150" y="350" width="500" height="100" rx="12" fill="#1a1a1a" opacity="0.7"/>
+    <text x="400" y="380" text-anchor="middle" fill="#5a7cff" font-size="11" font-family="monospace">def solution():</text>
+    <text x="400" y="400" text-anchor="middle" fill="#18ccff" font-size="11" font-family="monospace">    # Code assessment</text>
+    <text x="400" y="420" text-anchor="middle" fill="#5a7cff" font-size="11" font-family="monospace">    return result</text>
+  </g>
+  
+  <!-- Neural network nodes (small) -->
+  <g opacity="0.4">
+    <circle cx="650" cy="80" r="4" fill="#5a7cff"/>
+    <circle cx="670" cy="80" r="4" fill="#18ccff"/>
+    <circle cx="690" cy="80" r="4" fill="#5a7cff"/>
+  </g>
+  
+  <!-- Accuracy metric -->
+  <text x="400" y="120" text-anchor="middle" fill="#5a7cff" font-size="22" font-weight="700" opacity="0.8">88%</text>
+  <text x="400" y="140" text-anchor="middle" fill="#6b7280" font-size="11" opacity="0.7">Accuracy</text>
+</svg>
